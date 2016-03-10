@@ -1,5 +1,6 @@
 # Contributor: Matias Insaurralde <matias@insaurral.de>
 # Maintainer: Matias Insaurralde <matias@insaurral.de>
+
 pkgname=php-amqp
 pkgver=1.6.1
 pkgrel=0
@@ -7,14 +8,15 @@ pkgdesc="PHP AMQP Binding Library"
 url="https://github.com/pdezwart/php-amqp"
 arch="all"
 license="PHP"
-depends="librabbitmq"
-depends_dev="librabbitmq-dev"
-makedepends="$depends_dev"
+depends="librabbitmq php"
+depends_dev=""
+makedepends="librabbitmq-dev php-dev librabbitmq php"
 install=""
-subpackages="$pkgname-dev $pkgname-doc"
+subpackages=""
 source="$pkgname-$pkgver.tar.gz::https://github.com/pdezwart/php-amqp/archive/v$pkgver.tar.gz"
 
-_builddir=
+_builddir=${srcdir}/${pkgname}-${pkgver}
+
 prepare() {
 	local i
 	cd "$_builddir"
@@ -27,10 +29,16 @@ prepare() {
 
 build() {
 	cd "$_builddir"
+	phpize || return 1
+	./configure || return 1
+	make || return 1
 }
 
 package() {
 	cd "$_builddir"
+	make install INSTALL_ROOT="$pkgdir" || return 1
+	mkdir -p "$pkgdir"/etc/php/conf.d
+	echo "extension=amqp.so" > "$pkgdir"/etc/php/conf.d/amqp.ini
 }
 
 md5sums="599f83662bb9025d36f6077f935e679e  php-amqp-1.6.1.tar.gz"
